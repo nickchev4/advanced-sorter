@@ -1,0 +1,193 @@
+package org.lab03;
+
+import java.util.Random;
+
+/**
+ * Much like the sorter class in the simple sort lab, this class implements three
+ * seperate sorting algorithms that pass in an unsorted array object, and return
+ * it sorted in ascending order.
+ */
+public class AdvancedSorter {
+    public static int[] unsortedNums;
+    UnsortedArray nums = new UnsortedArray(unsortedNums);
+
+    public AdvancedSorter(){
+        this.nums = nums;
+    }
+    /*
+      This method implements a max heap data structure to be called
+      in the heapsort method.
+     */
+    public void heapify(UnsortedArray arr, int n, int i){
+        //initialize the largest element as the root node of the heap
+        int root = i;
+        //left idx
+        int l = 2 * i + 1;
+        //right index
+        int r = 2 * i + 2;
+        //if left child > root
+        if(l < n && arr.unsortedNums[l] > arr.unsortedNums[root]) { //if left child is larger than root
+            root = l;
+        }
+        //if right child > root
+        if (r < n && arr.unsortedNums[r] > arr.unsortedNums[root]){ //if right child is larger than root
+            root = r;
+        }
+        if(root != i){ //if the largest node is not the root
+            int temp = arr.unsortedNums[i];
+            arr.unsortedNums[i] = arr.unsortedNums[root];
+            arr.unsortedNums[root] = temp;
+
+            heapify(arr,n, root);
+        }
+    }
+
+    /*
+        Builds the heap with heapify, extracts the root and
+        swaps it with the last element in the heap, and repeats
+        until the array is sorted in ascending order.
+     */
+    public void heapSort(UnsortedArray arr){
+        int n = arr.unsortedNums.length;
+        //Create the heap
+        for(int i = n / 2-1; i >= 0; i--){
+            heapify(arr,n,i);
+        }
+        //extract elements and sort
+        for(int i = n-1; i > 0; i--){
+
+            int tempNode = arr.unsortedNums[0];
+            arr.unsortedNums[0] = arr.unsortedNums[i];
+            arr.unsortedNums[i] = tempNode;
+
+            heapify(arr,i,0);
+        }
+    }
+
+    /*
+        Helper function for calculating random pivot points (int) between low and high ints.
+        Function is implemented in the quicksort method for randomized pivoting.
+     */
+    public void generateRandom(UnsortedArray arr, int low, int high){
+        Random rand = new Random();
+        //Sets the upper and lower bounds for the generated random integer
+        int pivot = rand.nextInt(high-low)+low;
+        //Stores random generated ints into temporary array, swaps them with highest ints
+        int temp = arr.unsortedNums[pivot];
+        arr.unsortedNums[pivot] = arr.unsortedNums[high];
+        arr.unsortedNums[high] = temp;
+    }
+
+    /*
+        Helper function that carries out randomized pivoting. Implements the randomize
+        helper function. It places each pivot point at the correct spot in the array,
+        then places elements < pivot to the left of the point and items > pivot
+        to the right.
+     */
+    public int partition(UnsortedArray arr, int low, int high){
+        //random pivot point generated
+        generateRandom(arr, low, high);
+        int pivot = arr.unsortedNums[high];
+
+        int i = low-1; //index of element < pivot
+        for(int j = low; j < high; j++){
+            if(arr.unsortedNums[j] < pivot){
+                i++;
+                //swap the indices of i and j
+                int temp = arr.unsortedNums[i];
+                arr.unsortedNums[i] = arr.unsortedNums[j];
+                arr.unsortedNums[j] = temp;
+            }
+        }
+        //swap the indices of high and pivot if > pivot
+        int temp = arr.unsortedNums[i+1];
+        arr.unsortedNums[i+1] = arr.unsortedNums[high];
+        arr.unsortedNums[high] = temp;
+
+        return i+1;
+    }
+
+    /*
+        The main quicksort function that implements the random generator and
+        partition helper functions
+     */
+    public void sort(UnsortedArray arr, int low, int high){
+        if(low < high){
+            //partition the array into pivot points
+            //and store each pivot point into an array
+            int part = partition(arr,low,high);
+            //recursively sort the elements before and after partition
+            sort(arr,low,part-1);
+            sort(arr,part+1,high);
+
+        }
+    }
+    /*
+        Final quicksort function that sets bounds for pivot points
+     */
+    public void quickSort(UnsortedArray arr){
+        int n = arr.unsortedNums.length;
+        sort(arr,0,n-1); //sets bounds for lowest and highest pivot points
+
+    }
+
+    /*
+        Helper function to get the maximum value in the array
+     */
+    public int getMax(UnsortedArray arr, int n){
+        int max = arr.unsortedNums[0];
+        for(int i = 1; i < n; i++){
+            if(arr.unsortedNums[i] > max){
+                max = arr.unsortedNums[i];
+            }
+        }
+        return max;
+    }
+
+    /*
+        Counting sorter helper function that counts digits based on the
+        units, tens, or hundreds place
+     */
+    public void countSort(UnsortedArray arr, int n, int digit){
+        int countOutput[] = new int[n];
+        int i;
+        int x = 0;
+        int count[] = new int[10];
+        //increments the output array 10 times and adds +1 to index for each iteration
+        for(i = 0; i < count.length; i++){
+            count[i] = x;
+        }
+        //Store iterations in count
+        for(i = 0; i < n; i++){
+            count[(arr.unsortedNums[i]/digit) % 10]++;
+        }
+        //change count so count[i] contains actual position of this digit in output
+        for(i = 1; i < 10; i++){
+            count[i] += count[i-1];
+        }
+        //complete output array
+        for(i = n - 1; i >= 0; i--){
+            countOutput[count[(arr.unsortedNums[i] / digit) % 10] - 1] = arr.unsortedNums[i];
+            count[(arr.unsortedNums[i] / digit) % 10]--;
+        }
+        //copy output array to the unsorted array object
+        for(i = 0; i < n; i++){
+            arr.unsortedNums[i] = countOutput[i];
+        }
+    }
+    /*
+        The main radix sort method that utilizes the helper functions. Radix sort will
+        first locate the max element. Then, it will sort items based on the units
+        place, the tens place, and finally the hundreds place.
+     */
+    public void radixSort(UnsortedArray arr){
+        //First, find the max number in the array to find how many digits
+        //radixSort will sort by
+        int n = 0;
+        int max = getMax(arr,n);
+        //Next, do countSort for every number
+        for(int digit = 1; max/digit > 0; digit *= 10){
+            countSort(arr,n,digit);
+        }
+    }
+}
