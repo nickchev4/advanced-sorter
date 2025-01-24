@@ -1,2 +1,2 @@
-# advanced-sorter
-An example of my simple sorter program that implements more advanced sorting algorithms.
+**Overview:**
+This program sorts a user input array implementing more advanced sorting algorithms.
